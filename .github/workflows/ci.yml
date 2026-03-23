@@ -11,29 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23.x'
+          go-version: 1.23.0
+          cache: true
 
-      - name: Verify dependencies
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Format check
         run: |
-          go mod tidy
-          git diff --exit-code go.mod go.sum
-          
-      - name: Start services
-        run: |
-          docker compose up -d postgres kafka
-          echo "Waiting for Postgres to be ready..."
-          until docker compose exec -T postgres pg_isready -U postgres; do
-            sleep 2
-          done
+          go fmt ./...
+          git diff --exit-code
+
+      - name: Static Analysis
+        run: go vet ./...
 
       - name: Build
-        run: go build ./...
+        run: make build
 
-      - name: Test
-        run: go test ./...
+      - name: Tests
+        run: make test
