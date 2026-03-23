@@ -132,5 +132,4 @@ GoTradeX/
 └── Makefile            # Common build and run commands
 ```
 
-## 📜 License
-MIT License
+
