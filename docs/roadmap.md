@@ -561,8 +561,8 @@ ws.onmessage = (event) => {
 ## Execution Checklist
 
 ```
-[ ] Phase 1  — Architecture confirmed
-[ ] Phase 2  — Monorepo builds cleanly
+[x] Phase 1  — Architecture confirmed
+[x] Phase 2  — Monorepo builds cleanly
 [ ] Phase 3  — Gateway routes + middleware tested
 [ ] Phase 4  — User Service: register/login/balance via grpcurl
 [ ] Phase 5  — Order placed → in DB → in Kafka

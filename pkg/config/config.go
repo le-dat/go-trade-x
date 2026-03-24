@@ -1,19 +1,26 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppPort       string
-	DatabaseURL   string
-	KafkaBrokers  string
-	RedisURL      string
-	JWTSecret     string
+	AppPort      string
+	DatabaseURL  string
+	KafkaBrokers string
+	RedisURL     string
+	JWTSecret    string
 }
 
 func Load() *Config {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using defaults and system environment variables")
+	}
+
 	return &Config{
 		AppPort:      getEnv("APP_PORT", "8080"),
 		DatabaseURL:  getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/gotradex?sslmode=disable"),
