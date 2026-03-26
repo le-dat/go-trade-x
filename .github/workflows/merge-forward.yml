@@ -40,7 +40,7 @@ jobs:
             exit 0
           fi
 
-          for BRANCH in $FEATURE_BRANCHES; do
+          for BRANCH in "${FEATURE_BRANCHES[@]}"; do
             FEATURE_NAME=$(echo "$BRANCH" | sed 's|feature/||')
             echo ""
             echo "=== Processing $BRANCH ==="
