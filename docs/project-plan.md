@@ -2,15 +2,23 @@
 
 > Generated: 2026-03-31
 > Target: Milestone 1 — Core Platform (Phases 3–7)
-> Last Updated: 2026-03-31 (Session: docs scaffolding + plan generation)
+> Last Updated: 2026-04-01
 
 ---
 
 ## 🛠 Automation Recommendations
 
-- [ ] **Command: `go-build.md`** — Reason: Go project with 5 services; need a one-click build/lint/test command that verifies all services compile and pass static analysis before each commit.
-- [ ] **Command: `proto-dev.md`** — Reason: Proto files are the foundation for all gRPC services; a command to scaffold `.proto` files and regenerate Go code keeps this DRY.
-- [ ] **Agent: `matching-engine-agent.md`** — Reason: Matching engine is the highest-risk, most complex component (heap algorithm, concurrency, Kafka consumer); a dedicated agent ensures focused implementation with proper tests and benchmarks.
+All previously recommended automations have been implemented:
+
+- [x] **Command: `go-build.md`** ✅ — One-click build/lint/test for all 5 services
+- [x] **Command: `proto-dev.md`** ✅ — Proto scaffolding and code generation
+- [x] **Command: `dev-setup.md`** ✅ — Docker infra startup + health checks
+- [x] **Command: `kafka-test.md`** ✅ — Kafka round-trip test
+- [x] **Agent: `matching-engine-agent.md`** ✅ — Focused matching engine implementation
+- [x] **Agent: `go-review-agent.md`** ✅ — Go code review (concurrency, Kafka, gRPC patterns)
+
+**New recommendation:**
+- [ ] **Agent: `user-service-agent.md`** — Reason: User service is Phase 4 with DB schema + bcrypt + JWT + gRPC; a focused agent ensures all parts wired correctly end-to-end.
 
 ---
 
