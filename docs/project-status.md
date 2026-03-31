@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-03-31
+> Last updated: 2026-04-01
 
 ## Current Phase
 
@@ -57,6 +57,15 @@ See `git log --oneline` for recent activity.
 
 ## Session History
 
+### 2026-04-01 — Session 2
+
+**Completed:**
+- Reviewed existing plan — all previously recommended automations are implemented and committed
+- Updated `docs/project-plan.md` automation section: marked go-build, proto-dev, dev-setup, kafka-test, matching-engine-agent, go-review-agent as ✅ implemented
+- Added new recommendation: user-service-agent for Phase 4 implementation
+
+**No code changes this session.**
+
 ### 2026-03-31 — Session 1
 
 **Completed:**
@@ -75,13 +84,18 @@ See `git log --oneline` for recent activity.
 - `matching-engine-agent.md` — focused matching engine implementation
 
 **Next Session — Start Here:**
-1. Run `make docker-up` to verify infrastructure
-2. Run Step 1: Install gRPC toolchain (`protoc-gen-go`, `protoc-gen-go-grpc`)
-3. Continue Phase 3: Replace mock gRPC clients with real ones
-4. Then proceed to Phase 4 (User Service) — highest priority on critical path
+1. `/dev-setup` — start postgres, kafka, redis via docker-compose
+2. Install gRPC toolchain: `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
+3. `/proto-dev user` — scaffold user.proto + generate gRPC code
+4. Create `migrations/001_create_users.up.sql` (users + balances tables)
+5. Implement `cmd/user-service/main.go` (repository → service → handler)
+6. `/go-build` to verify all 5 services compile
+7. Use `go-review-agent` before any PR
 
 ## Notes
 
 - Phase 1-2 were completed as of initial setup
-- Current branch: `feat/ci-go`
-- All session files (CLAUDE.md, docs/*, new handler/middleware/pkg packages) are uncommitted — run `/commit` to save
+- Phase 3 partial: API Gateway middleware done, gRPC client still mock
+- Current branch: `feat/ci-go` (4 commits ahead of origin)
+- All project changes from session 1 are committed
+- `.claude/` directory contains Claude's own agents/commands/settings — not part of the project
