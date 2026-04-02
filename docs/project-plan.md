@@ -17,8 +17,8 @@ All previously recommended automations have been implemented:
 - [x] **Agent: `matching-engine-agent.md`** ✅ — Focused matching engine implementation
 - [x] **Agent: `go-review-agent.md`** ✅ — Go code review (concurrency, Kafka, gRPC patterns)
 
-**New recommendation:**
-- [ ] **Agent: `user-service-agent.md`** — Reason: User service is Phase 4 with DB schema + bcrypt + JWT + gRPC; a focused agent ensures all parts wired correctly end-to-end.
+**Completed:**
+- [x] **Agent: `user-service-agent.md`** ✅ — Reason: User service is Phase 4 with DB schema + bcrypt + JWT + gRPC; a focused agent ensures all parts wired correctly end-to-end.
 
 ---
 
@@ -38,11 +38,11 @@ All previously recommended automations have been implemented:
 
 ---
 
-## Phase 3 — API Gateway Completion (~1 day)
+## Phase 3 — API Gateway Completion ✅ (~1 day)
 
-> Currently: Gin + middleware done. Gap: real gRPC clients, order endpoint wiring.
+> **Status: Complete** — Phase 3 API Gateway finished (commit 11a16bc).
 
-### Step 1: Install gRPC toolchain
+### Step 1: Install gRPC toolchain ✅
 
 ```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest

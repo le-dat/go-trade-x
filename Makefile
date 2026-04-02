@@ -2,7 +2,7 @@ BINARY_DIR=bin
 PROTO_DIR=proto
 MIGRATIONS_DIR=migrations
 
-.PHONY: build clean run-api run-user run-order run-matching run-market docker-up docker-down docker-build proto migrate lint help
+.PHONY: build clean run-api run-user run-order run-matching run-market run-all docker-up docker-down docker-build proto migrate lint help
 
 build:
 	mkdir -p $(BINARY_DIR)
@@ -53,6 +53,13 @@ run-matching:
 run-market:
 	go run ./cmd/market-service
 
+run-all:
+	go run ./cmd/user-service & \
+	go run ./cmd/order-service & \
+	go run ./cmd/matching-engine & \
+	go run ./cmd/market-service & \
+	go run ./cmd/api-gateway
+
 test:
 	go test ./...
 
@@ -65,4 +72,5 @@ help:
 	@echo "  docker-up     - Start infrastructure with docker-compose"
 	@echo "  docker-down   - Stop infrastructure"
 	@echo "  test          - Run all tests"
+	@echo "  run-all       - Run all services locally"
 	@echo "  run-<service> - Run specific service locally"

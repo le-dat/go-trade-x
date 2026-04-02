@@ -1,21 +1,21 @@
 # Project Status
 
-> Last updated: 2026-04-01
+> Last updated: 2026-04-02
 
 ## Current Phase
 
-**Phase 3: API Gateway** — In Progress
+**Phase 4: User Service** — In Progress
 
 ## Overall Progress
 
-**~15%** ███░░░░░░░░░░░░░░░░░ (Phase 1-2 complete, Phase 3 partial, Phase 4-11 planned)
+**~20%** ████░░░░░░░░░░░░░░░░ (Phase 1-3 complete, Phase 4 partial, Phase 5-11 planned)
 
 ## Phase Execution Checklist
 
 ```
 [x] Phase 1  — Architecture confirmed
 [x] Phase 2  — Monorepo builds cleanly
-[ ] Phase 3  — Gateway routes + middleware tested
+[x] Phase 3  — Gateway routes + middleware tested
 [ ] Phase 4  — User Service: register/login/balance via grpcurl
 [ ] Phase 5  — Order placed → in DB → in Kafka
 [ ] Phase 6  — Kafka producer/consumer round-trip test
@@ -57,6 +57,16 @@ See `git log --oneline` for recent activity.
 
 ## Session History
 
+### 2026-04-02 — Session 3
+
+**Completed:**
+- Added `.claude/` automation framework with research agent, project planning, and workflow hooks
+- Added GoTradeX-specific agents: matching-engine-agent, go-review-agent, user-service-agent, go-build, proto-dev, dev-setup, kafka-test
+- Marked all 6 recommended automations as implemented in project-plan.md
+- Phase 3 API Gateway now complete (commit 11a16bc)
+
+**No code changes this session.**
+
 ### 2026-04-01 — Session 2
 
 **Completed:**
@@ -89,13 +99,13 @@ See `git log --oneline` for recent activity.
 3. `/proto-dev user` — scaffold user.proto + generate gRPC code
 4. Create `migrations/001_create_users.up.sql` (users + balances tables)
 5. Implement `cmd/user-service/main.go` (repository → service → handler)
-6. `/go-build` to verify all 5 services compile
-7. Use `go-review-agent` before any PR
+6. Use `user-service-agent` for focused Phase 4 implementation
+7. `/go-build` to verify all 5 services compile
+8. Use `go-review-agent` before any PR
 
 ## Notes
 
-- Phase 1-2 were completed as of initial setup
-- Phase 3 partial: API Gateway middleware done, gRPC client still mock
-- Current branch: `feat/ci-go` (4 commits ahead of origin)
-- All project changes from session 1 are committed
+- Phase 1-3 complete as of this session
+- Phase 4 (User Service) is next
+- Current branch: `feat/ci-go`
 - `.claude/` directory contains Claude's own agents/commands/settings — not part of the project
