@@ -18,7 +18,30 @@ import (
 	"github.com/verno/gotradex/pkg/logger"
 	"go.uber.org/zap"
 	"golang.org/x/time/rate"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/verno/gotradex/cmd/api-gateway/docs"
 )
+
+// @title GoTradeX API
+// @version 1.0
+// @description High-performance trading platform API Gateway.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.gotradex.com/support
+// @contact.email support@gotradex.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	cfg := config.Load()
@@ -54,6 +77,9 @@ func main() {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	// Swagger UI
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

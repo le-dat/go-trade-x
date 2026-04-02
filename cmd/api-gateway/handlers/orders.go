@@ -27,6 +27,19 @@ type PlaceOrderRequest struct {
 	IdempotencyKey  string `json:"idempotency_key" binding:"required"`
 }
 
+// PlaceOrder handles order creation
+// @Summary Place a new buy or sell order
+// @Description Creates a new order for a specific symbol (e.g., BTC/USD)
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body PlaceOrderRequest true "Order details"
+// @Success 201 {object} map[string]interface{} "Order created"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 400 {object} map[string]string "Invalid request"
+// @Failure 500 {object} map[string]string "Server error"
+// @Router /orders [post]
 func (h *OrderHandler) PlaceOrder(c *gin.Context) {
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {
@@ -86,6 +99,17 @@ func (h *OrderHandler) PlaceOrder(c *gin.Context) {
 	})
 }
 
+// GetOrder retrieves a specific order
+// @Summary Get order details
+// @Description Fetches details of an existing order by its ID
+// @Tags orders
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Order ID"
+// @Success 200 {object} map[string]interface{} "Order found"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Order not found"
+// @Router /orders/{id} [get]
 func (h *OrderHandler) GetOrder(c *gin.Context) {
 	orderID := c.Param("id")
 	if orderID == "" {

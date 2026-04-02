@@ -2,7 +2,7 @@ BINARY_DIR=bin
 PROTO_DIR=proto
 MIGRATIONS_DIR=migrations
 
-.PHONY: build clean run-api run-user run-order run-matching run-market run-all docker-up docker-down docker-build proto migrate lint help
+.PHONY: build clean run-api run-user run-order run-matching run-market run-all docker-up docker-down docker-build proto migrate lint help swagger
 
 build:
 	mkdir -p $(BINARY_DIR)
@@ -25,6 +25,11 @@ migrate:
 
 lint:
 	golangci-lint run
+
+swagger:
+	# Install swag CLI if not installed
+	# go install github.com/swaggo/swag/cmd/swag@latest
+	$(shell go env GOPATH)/bin/swag init -g cmd/api-gateway/main.go -o cmd/api-gateway/docs
 
 docker-build:
 	docker compose build
@@ -67,6 +72,7 @@ help:
 	@echo "Available targets:"
 	@echo "  build         - Build all services"
 	@echo "  proto         - Generate gRPC code"
+	@echo "  swagger       - Generate Swagger documentation"
 	@echo "  migrate       - Run database migrations"
 	@echo "  lint          - Run golangci-lint"
 	@echo "  docker-up     - Start infrastructure with docker-compose"
