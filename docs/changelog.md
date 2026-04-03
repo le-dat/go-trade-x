@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **User Service (Phase 4)**: Implemented full gRPC user service with database layer
+  - proto/user.proto, proto/order.proto: gRPC service definitions
+  - internal/user/repository.go: pgx database operations for users/balances
+  - internal/user/service.go: bcrypt password hashing + JWT token generation
+  - internal/user/handler.go: gRPC handler with Register/Login/GetBalance/DeductBalance/CreditBalance
+  - cmd/user-service/main.go: gRPC server wiring with graceful shutdown
+- **Database migrations**: 001_create_users (users + balances tables), 002_create_orders (orders table)
 - **.claude automation framework**: Added .claude/ directory with research agent, project planning, and workflow hooks
 - **Project-specific agents**: Added GoTradeX-specific commands and agents (matching-engine-agent, go-review-agent, user-service-agent, go-build, proto-dev, dev-setup, kafka-test)
 - **Docs scaffolding**: Filled CLAUDE.md (all placeholders replaced from roadmap), created docs/project-plan.md with full Phase 1-11 execution plan, created docs/spec-doc.md with phase milestones

@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-04-02
+> Last updated: 2026-04-03
 
 ## Current Phase
 
@@ -16,7 +16,7 @@
 [x] Phase 1  — Architecture confirmed
 [x] Phase 2  — Monorepo builds cleanly
 [x] Phase 3  — Gateway routes + middleware tested
-[ ] Phase 4  — User Service: register/login/balance via grpcurl
+[x] Phase 4  — User Service: register/login/balance via grpcurl (Steps 4-6 done, Step 7 pending)
 [ ] Phase 5  — Order placed → in DB → in Kafka
 [ ] Phase 6  — Kafka producer/consumer round-trip test
 [ ] Phase 7  — Matching engine: 10k orders benchmark
@@ -56,6 +56,28 @@ See `CLAUDE.md` for detailed phase specifications.
 See `git log --oneline` for recent activity.
 
 ## Session History
+
+### 2026-04-03 — Session 4
+
+**Completed:**
+- Installed protoc and gRPC toolchain (protoc-gen-go, protoc-gen-go-grpc)
+- Created proto/user.proto and proto/order.proto with gRPC service definitions
+- Generated Go code from protos (proto/*.pb.go, proto/*_grpc.pb.go)
+- Created migrations: 001_create_users, 002_create_orders
+- Implemented user service: repository (pgx), service (bcrypt+JWT), handler (gRPC)
+- Updated go.mod with pgx/v5, grpc v1.80, and proto replace directive
+- All 5 services now build successfully
+
+**Pending:**
+- Step 7: Verify user service with grpcurl (requires running postgres)
+- Phase 5: Kafka package (Steps 8-10)
+- Phase 6: Order service implementation
+
+**Next Session — Start Here:**
+1. Start postgres via `docker compose up -d postgres`
+2. Run migrations: `psql $DATABASE_URL -f migrations/001_create_users.up.sql`
+3. Verify user service: `grpcurl -plaintext -d '{"email":"test@test.com","password":"secret"}' localhost:50051 user.UserService/Register`
+4. Implement pkg/kafka (Phase 5) before Order Service
 
 ### 2026-04-02 — Session 3
 

@@ -2,7 +2,7 @@
 
 > Generated: 2026-03-31
 > Target: Milestone 1 — Core Platform (Phases 3–7)
-> Last Updated: 2026-04-01
+> Last Updated: 2026-04-03
 
 ---
 
@@ -70,9 +70,14 @@ curl http://localhost:8080/healthz
 
 ---
 
-## Phase 4 — User Service (~3 days)
+## Phase 4 — User Service ✅ (Steps 4-6 complete, Step 7 pending)
 
-### Step 4: Create `proto/user.proto`
+### Step 4: Create `proto/user.proto` ✅
+
+```protobuf
+syntax = "proto3";
+package user;
+option go_package = "github.com/verno/gotradex/pkg/proto/user";
 
 ```protobuf
 syntax = "proto3";
@@ -88,9 +93,9 @@ service UserService {
 }
 ```
 
-- Done when: `protoc $(PROTO_DIR)/user.proto` generates `pkg/proto/user/*.pb.go`
+- Done when: `protoc $(PROTO_DIR)/user.proto` generates `pkg/proto/user/*.pb.go` ✅
 
-### Step 5: Create SQL migrations for users/balances
+### Step 5: Create SQL migrations for users/balances ✅
 
 ```sql
 -- migrations/001_create_users.up.sql
@@ -114,16 +119,16 @@ DROP TABLE IF EXISTS balances;
 DROP TABLE IF EXISTS users;
 ```
 
-- Done when: `psql $DATABASE_URL -f migrations/001_create_users.up.sql` succeeds
+- Done when: `psql $DATABASE_URL -f migrations/001_create_users.up.sql` succeeds ✅
 
-### Step 6: Implement `cmd/user-service/main.go`
+### Step 6: Implement `cmd/user-service/main.go` ✅
 
 - Repository: `internal/user/repository.go` — raw `pgx` or `sqlc`-generated
 - Service: `internal/user/service.go` — bcrypt + JWT (HS256, 24h)
 - Handler: gRPC server on `:50051`
 - Done when: `grpcurl localhost:50051 list` shows `user.UserService`
 
-### Step 7: Verify with grpcurl
+### Step 7: Verify with grpcurl (pending)
 
 ```bash
 grpcurl -plaintext -d '{"email":"test@test.com","password":"secret"}' localhost:50051 user.UserService/Register
