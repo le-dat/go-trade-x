@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -148,15 +149,38 @@ func (r *postgresRepository) GetAvailableBalance(ctx context.Context, userID uui
 }
 
 func (r *postgresRepository) DeductBalance(ctx context.Context, userID uuid.UUID, asset string, amount float64) error {
-	result, err := r.db.Exec(ctx,
-		`UPDATE balances SET available = available - $1 WHERE user_id = $2 AND asset = $3 AND available >= $1`,
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	var available float64
+	err = tx.QueryRow(ctx,
+		`SELECT available FROM balances WHERE user_id = $1 AND asset = $2 FOR UPDATE`,
+		userID, asset,
+	).Scan(&available)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return errors.New("insufficient balance or asset not found")
+		}
+		return fmt.Errorf("failed to select balance: %w", err)
+	}
+
+	if available < amount {
+		return errors.New("insufficient balance or asset not found")
+	}
+
+	_, err = tx.Exec(ctx,
+		`UPDATE balances SET available = available - $1 WHERE user_id = $2 AND asset = $3`,
 		amount, userID, asset,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to deduct balance: %w", err)
 	}
-	if result.RowsAffected() == 0 {
-		return errors.New("insufficient balance or asset not found")
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return nil
 }

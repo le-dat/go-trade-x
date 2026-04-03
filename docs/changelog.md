@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CI/Build**: Added `verify-user` and `verify-order-service` Makefile targets for end-to-end verification
+- **Database Migrations**: Added `migrate-up` and `migrate-down` targets with explicit DATABASE_URL support
+
+### Changed
+
+- **Makefile**: Added `DATABASE_URL` with correct docker port 5436, enhanced migration targets, verification targets
+- **DeductBalance race condition fix**: Changed from atomic UPDATE to `SELECT ... FOR UPDATE` transaction to prevent concurrent overdrafts (per CLAUDE.md rule #4)
+
+### Fixed
+
+- **User repository (DeductBalance)**: Fixed potential race condition by adding row-level locking with `SELECT ... FOR UPDATE` inside a transaction
+
+### Security
+
+---
+
+## [0.1.0] — 2026-04-03
+
+### Added
+
 - **User Service (Phase 4)**: Implemented full gRPC user service with database layer
   - proto/user.proto, proto/order.proto: gRPC service definitions
   - internal/user/repository.go: pgx database operations for users/balances

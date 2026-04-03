@@ -70,7 +70,7 @@ curl http://localhost:8080/healthz
 
 ---
 
-## Phase 4 — User Service ✅ (Steps 4-6 complete, Step 7 pending)
+## Phase 4 — User Service ✅ (Steps 4-7 complete)
 
 ### Step 4: Create `proto/user.proto` ✅
 
@@ -128,17 +128,17 @@ DROP TABLE IF EXISTS users;
 - Handler: gRPC server on `:50051`
 - Done when: `grpcurl localhost:50051 list` shows `user.UserService`
 
-### Step 7: Verify with grpcurl (pending)
+### Step 7: Verify with grpcurl ✅
 
 ```bash
 grpcurl -plaintext -d '{"email":"test@test.com","password":"secret"}' localhost:50051 user.UserService/Register
 ```
 
-- Done when: Register returns user ID; Login returns JWT
+- Done when: Register returns user ID; Login returns JWT ✅ (2026-04-03)
 
 ---
 
-## Phase 5 — Kafka Package (Prerequisite) (~2 days)
+## Phase 5 — Kafka Package ✅ (Prerequisite) (~2 days)
 
 > **Run this before Phase 4/5 service wiring.** Both Order Service and Matching Engine depend on it.
 

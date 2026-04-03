@@ -4,11 +4,11 @@
 
 ## Current Phase
 
-**Phase 4: User Service** — In Progress
+**Phase 5: Order Service — Next
 
 ## Overall Progress
 
-**~20%** ████░░░░░░░░░░░░░░░░ (Phase 1-3 complete, Phase 4 partial, Phase 5-11 planned)
+**~25%** ████░░░░░░░░░░░░░░░░ (Phase 1-3 complete, Phase 4 complete, Phase 5-11 planned)
 
 ## Phase Execution Checklist
 
@@ -16,7 +16,7 @@
 [x] Phase 1  — Architecture confirmed
 [x] Phase 2  — Monorepo builds cleanly
 [x] Phase 3  — Gateway routes + middleware tested
-[x] Phase 4  — User Service: register/login/balance via grpcurl (Steps 4-6 done, Step 7 pending)
+[x] Phase 4  — User Service: register/login/balance via grpcurl (Steps 4-6 done, Step 7 complete)
 [ ] Phase 5  — Order placed → in DB → in Kafka
 [ ] Phase 6  — Kafka producer/consumer round-trip test
 [ ] Phase 7  — Matching engine: 10k orders benchmark
@@ -57,6 +57,24 @@ See `git log --oneline` for recent activity.
 
 ## Session History
 
+### 2026-04-03 — Session 5
+
+**Completed:**
+- Fixed DeductBalance race condition in `internal/user/repository.go` using `SELECT ... FOR UPDATE` transaction
+- Updated Makefile with proper `DATABASE_URL` (port 5436), migration targets (`migrate-up`, `migrate-down`), and verification targets (`verify-user`, `verify-order-service`)
+- Phase 4 User Service marked complete in project documentation
+- Build and vet pass with no issues
+
+**Pending:**
+- Phase 5: Order Service → Kafka (Steps 8-10: Kafka package, then 11-14: Order service)
+- Phase 6: Matching engine implementation (Steps 15-18)
+
+**Next Session — Start Here:**
+1. `make docker-up` to start postgres
+2. `make migrate` to run migrations
+3. `make verify-user` to test user service with grpcurl
+4. Implement `pkg/kafka` (Phase 5, Steps 8-10) before Order Service
+
 ### 2026-04-03 — Session 4
 
 **Completed:**
@@ -72,12 +90,6 @@ See `git log --oneline` for recent activity.
 - Step 7: Verify user service with grpcurl (requires running postgres)
 - Phase 5: Kafka package (Steps 8-10)
 - Phase 6: Order service implementation
-
-**Next Session — Start Here:**
-1. Start postgres via `docker compose up -d postgres`
-2. Run migrations: `psql $DATABASE_URL -f migrations/001_create_users.up.sql`
-3. Verify user service: `grpcurl -plaintext -d '{"email":"test@test.com","password":"secret"}' localhost:50051 user.UserService/Register`
-4. Implement pkg/kafka (Phase 5) before Order Service
 
 ### 2026-04-02 — Session 3
 
