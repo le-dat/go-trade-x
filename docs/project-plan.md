@@ -138,7 +138,7 @@ grpcurl -plaintext -d '{"email":"test@test.com","password":"secret"}' localhost:
 
 ---
 
-## Phase 5 — Kafka Package ✅ (Prerequisite) (~2 days)
+## Phase 5 — Kafka Package (~2 days)
 
 > **Run this before Phase 4/5 service wiring.** Both Order Service and Matching Engine depend on it.
 

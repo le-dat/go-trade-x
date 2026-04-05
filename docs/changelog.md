@@ -12,14 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI/Build**: Added `verify-user` and `verify-order-service` Makefile targets for end-to-end verification
 - **Database Migrations**: Added `migrate-up` and `migrate-down` targets with explicit DATABASE_URL support
 
+### Fixed
+
+- **User repository (DeductBalance)**: Fixed potential race condition by adding row-level locking with `SELECT ... FOR UPDATE` inside a transaction
+- **Lint fixes**: Fixed unchecked `tx.Rollback()` error in `internal/user/repository.go` and removed unused `getEnvInt` function from `pkg/config/config.go`
+
 ### Changed
 
 - **Makefile**: Added `DATABASE_URL` with correct docker port 5436, enhanced migration targets, verification targets
 - **DeductBalance race condition fix**: Changed from atomic UPDATE to `SELECT ... FOR UPDATE` transaction to prevent concurrent overdrafts (per CLAUDE.md rule #4)
-
-### Fixed
-
-- **User repository (DeductBalance)**: Fixed potential race condition by adding row-level locking with `SELECT ... FOR UPDATE` inside a transaction
 
 ### Security
 

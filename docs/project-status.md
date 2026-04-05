@@ -1,6 +1,6 @@
 # Project Status
 
-> Last updated: 2026-04-03
+> Last updated: 2026-04-04
 
 ## Current Phase
 
@@ -56,6 +56,21 @@ See `CLAUDE.md` for detailed phase specifications.
 See `git log --oneline` for recent activity.
 
 ## Session History
+
+### 2026-04-04 — Session 6
+
+**Completed:**
+- Fixed 2 lint errors: unchecked `tx.Rollback()` in `internal/user/repository.go` and unused `getEnvInt` in `pkg/config/config.go`
+- Ran `/go-build`: all 5 services build ✅, vet ✅, lint ✅, tests ✅ (no test files yet)
+
+**Pending:**
+- Phase 5: Order Service → Kafka (Steps 8-10: Kafka package, then 11-14: Order service)
+- Phase 6: Matching engine implementation (Steps 15-18)
+
+**Next Session — Start Here:**
+1. Implement `pkg/kafka` (Phase 5, Steps 8-10) before Order Service
+2. Start Phase 5: Order Service — create `proto/order.proto`, `migrations/002`, implement order service
+3. `make docker-up` to start postgres
 
 ### 2026-04-03 — Session 5
 

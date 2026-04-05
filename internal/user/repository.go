@@ -153,7 +153,7 @@ func (r *postgresRepository) DeductBalance(ctx context.Context, userID uuid.UUID
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var available float64
 	err = tx.QueryRow(ctx,
