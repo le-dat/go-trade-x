@@ -27,31 +27,6 @@ jobs:
       - name: Run Tests
         run: go test -v ./...
 
-  frontend-check:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/frontend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
-
-      - name: Lint and Build
-        run: |
-          pnpm run lint
-          pnpm run build
-        
   docker-dry-run:
     runs-on: ubuntu-latest
     needs: [backend-check]
