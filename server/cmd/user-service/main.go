@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -19,6 +20,22 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+func getEnvInt(key string, fallback int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		if i, err := strconv.Atoi(value); err == nil {
+			return i
+		}
+	}
+	return fallback
+}
+
+func getEnvStr(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
 
 func main() {
 	cfg := config.Load()
@@ -43,8 +60,8 @@ func run(ctx context.Context, cfg *config.Config, log *zap.Logger) error {
 		return fmt.Errorf("failed to parse database URL: %w", err)
 	}
 
-	poolConfig.MaxConns = 10
-	poolConfig.MinConns = 2
+	poolConfig.MaxConns = int32(getEnvInt("MAX_CONNS", 10))
+	poolConfig.MinConns = int32(getEnvInt("MIN_CONNS", 2))
 
 	conn, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
@@ -76,7 +93,10 @@ func run(ctx context.Context, cfg *config.Config, log *zap.Logger) error {
 
 	grpcServer := grpc.NewServer()
 	proto.RegisterUserServiceServer(grpcServer, handler)
-	reflection.Register(grpcServer) // Enable reflection for grpcurl
+	enableReflection := getEnvStr("ENABLE_REFLECTION", "false") == "true"
+	if enableReflection {
+		reflection.Register(grpcServer)
+	}
 
 	// Start server
 	go func() {

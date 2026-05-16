@@ -38,6 +38,9 @@ func NewService(repo Repository, jwtMgr *auth.JWTManager, jwtExpiry time.Duratio
 }
 
 func (s *service) Register(ctx context.Context, email, password string) (*User, error) {
+	if len(password) > 128 {
+		return nil, errors.New("password must be 128 characters or less")
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err

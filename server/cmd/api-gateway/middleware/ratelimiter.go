@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -13,14 +14,39 @@ type RateLimiter struct {
 	mu       sync.RWMutex
 	rps      rate.Limit
 	burst    int
+	stopCh   chan struct{}
 }
 
 func NewRateLimiter(rps rate.Limit, burst int) *RateLimiter {
-	return &RateLimiter{
+	rl := &RateLimiter{
 		visitors: make(map[string]*rate.Limiter),
 		rps:      rps,
 		burst:    burst,
+		stopCh:   make(chan struct{}),
 	}
+	go rl.cleanup()
+	return rl
+}
+
+func (rl *RateLimiter) cleanup() {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			rl.mu.Lock()
+			for ip := range rl.visitors {
+				delete(rl.visitors, ip)
+			}
+			rl.mu.Unlock()
+		case <-rl.stopCh:
+			return
+		}
+	}
+}
+
+func (rl *RateLimiter) Stop() {
+	close(rl.stopCh)
 }
 
 func (rl *RateLimiter) getVisitor(ip string) *rate.Limiter {
