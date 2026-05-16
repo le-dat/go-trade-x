@@ -1,5 +1,6 @@
 services:
   api-gateway:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-api-gateway:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -14,6 +15,7 @@ services:
         condition: service_healthy
 
   user-service:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-user-service:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -26,6 +28,7 @@ services:
         condition: service_healthy
 
   order-service:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-order-service:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -39,6 +42,7 @@ services:
         condition: service_healthy
 
   matching-engine:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-matching-engine:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -48,6 +52,7 @@ services:
       - KAFKA_BROKERS=kafka:9092
 
   market-service:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-market-service:latest
     build:
       context: .
       dockerfile: docker/Dockerfile

@@ -1,0 +1,79 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api-gateway, user-service, order-service, matching-engine, market-service]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase Repo Owner
+        run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/server
+          file: ./src/server/docker/Dockerfile
+          build-args: SERVICE_NAME=${{ matrix.service }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/gotradex-${{ matrix.service }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_PAT: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || '22' }}
+          envs: GHCR_PAT
+          script: |
+            set -e
+            
+            # Login to GitHub Container Registry using the ephemeral token
+            echo $GHCR_PAT | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            cd /home/moltbot/server/go-trade-x/server
+            git fetch origin
+            git pull origin main
+            
+            # Export repository owner (lowercased) for docker-compose
+            export GITHUB_REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+            
+            # Deploy using Makefile
+            make prod-pull
+            make prod-restart
+            
+            # Clean up old images
+            docker image prune -af

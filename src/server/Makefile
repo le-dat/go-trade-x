@@ -47,6 +47,13 @@ prod-up: infra-up migrate ## [PROD] Start all services (Production) + Auto Migra
 prod-down: ## [PROD] Stop all services
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 
+prod-pull: ## [PROD] Pull all images
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+
+prod-restart: ## [PROD] Stop and start all services
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+
 prod-logs: ## [PROD] Follow all logs
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f --tail=100
 
