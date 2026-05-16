@@ -1,4 +1,12 @@
 services:
+  postgres:
+    ports:
+      - "5436:5432"
+
+  kafka:
+    ports:
+      - "9092:9092"
+
   api-gateway:
     build:
       context: .
@@ -9,11 +17,13 @@ services:
       - "8080:8080"
     environment:
       - APP_PORT=8080
-      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
-      - KAFKA_BROKERS=localhost:9092
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gotradex}?sslmode=disable
+      - KAFKA_BROKERS=kafka:9092
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - backend
 
   user-service:
     build:
@@ -24,10 +34,12 @@ services:
     ports:
       - "50051:50051"
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gotradex}?sslmode=disable
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - backend
 
   order-service:
     build:
@@ -36,11 +48,13 @@ services:
       args:
         SERVICE_NAME: order-service
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
-      - KAFKA_BROKERS=localhost:9092
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gotradex}?sslmode=disable
+      - KAFKA_BROKERS=kafka:9092
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - backend
 
   matching-engine:
     build:
@@ -49,7 +63,9 @@ services:
       args:
         SERVICE_NAME: matching-engine
     environment:
-      - KAFKA_BROKERS=localhost:9092
+      - KAFKA_BROKERS=kafka:9092
+    networks:
+      - backend
 
   market-service:
     build:
@@ -60,4 +76,6 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - KAFKA_BROKERS=localhost:9092
+      - KAFKA_BROKERS=kafka:9092
+    networks:
+      - backend
