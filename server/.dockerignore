@@ -1,0 +1,13 @@
+# Go
+bin/
+vendor/
+go.sum
+
+# Docker
+docker/
+docker-compose*.yml
+
+# OS
+.DS_Store
+*.swp
+*.log

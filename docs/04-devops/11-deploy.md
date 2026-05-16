@@ -45,19 +45,19 @@ Document production deployment requirements and checklist.
 ### 1. Build Images
 
 ```bash
-docker compose -f docker-compose.yml build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml build
 ```
 
 ### 2. Run Migrations
 
 ```bash
-docker compose exec api-gateway /app/migrate-up
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec postgres psql -U postgres -d gotradex -f /path/to/migrations/*.up.sql
 ```
 
 ### 3. Start Services
 
 ```bash
-docker compose up -d
+make prod-up
 ```
 
 ### 4. Verify
@@ -83,8 +83,19 @@ curl http://localhost:8080/healthz
 ## Rollback Procedure
 
 1. Re-tag previous image: `docker tag gotradex:prev gotradex:current`
-2. Restart service: `docker compose restart <service>`
+2. Restart service: `docker compose -f docker-compose.yml -f docker-compose.prod.yml restart <service>`
 3. Verify: `curl http://localhost:8080/healthz`
+
+---
+
+## Makefile Deployment Targets
+
+```bash
+make prod-up          # Start all services for production (no port exposure)
+make prod-stop        # Stop all production services
+make docker-logs      # Follow logs
+make docker-logs-<svc> # Follow specific service logs
+```
 
 ---
 

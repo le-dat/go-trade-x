@@ -48,6 +48,15 @@ CREATE TABLE IF NOT EXISTS orders (
   status TEXT DEFAULT 'PENDING',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS outbox (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic TEXT NOT NULL,
+  key TEXT NOT NULL,
+  payload JSONB NOT NULL,
+  status TEXT DEFAULT 'PENDING', -- PENDING, PROCESSED, FAILED
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
 Order status values: `PENDING`, `PARTIAL`, `FILLED`, `CANCELLED`
@@ -83,22 +92,31 @@ func (s *orderService) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (
         return &PlaceOrderResponse{OrderId: existing.ID, Status: existing.Status}, nil
     }
 
-    // 2. Deduct balance (lock funds)
+    // 2. Deduct balance via User Service (gRPC)
     _, err = s.userClient.DeductBalance(ctx, req.UserId, "USD", req.Quantity)
     if err != nil {
         return nil, fmt.Errorf("deduct balance: %w", err)
     }
 
-    // 3. Persist order
-    order := &Order{...}
-    if err := s.repo.Create(ctx, order); err != nil {
-        s.userClient.CreditBalance(ctx, req.UserId, "USD", req.Quantity)
-        return nil, fmt.Errorf("create order: %w", err)
-    }
+    // 3. Atomic DB Transaction: Order + Outbox
+    err = s.db.WithTransaction(ctx, func(tx Transaction) error {
+        order := &Order{...}
+        if err := s.repo.CreateWithTx(ctx, tx, order); err != nil {
+            return err
+        }
 
-    // 4. Publish to Kafka [orders]
-    if err := s.kafka.Publish(ctx, "orders", req.UserId, order.ToJSON()); err != nil {
-        return nil, fmt.Errorf("publish order: %w", err)
+        outboxMsg := &OutboxMessage{
+            Topic:   "orders",
+            Key:     order.UserID,
+            Payload: order.ToJSON(),
+        }
+        return s.outboxRepo.CreateWithTx(ctx, tx, outboxMsg)
+    })
+
+    if err != nil {
+        // Rollback balance if DB transaction fails
+        s.userClient.CreditBalance(ctx, req.UserId, "USD", req.Quantity)
+        return nil, fmt.Errorf("transaction failed: %w", err)
     }
 
     return &PlaceOrderResponse{OrderId: order.ID, Status: order.Status}, nil
@@ -107,7 +125,32 @@ func (s *orderService) PlaceOrder(ctx context.Context, req *PlaceOrderRequest) (
 
 ---
 
-## Step 5.3 — Start & Test
+## Step 5.3 — Outbox Relay (The "Worker")
+
+`internal/order/relay.go`:
+
+```go
+func (r *Relay) Start(ctx context.Context) {
+    ticker := time.NewTicker(100 * time.Millisecond)
+    for {
+        select {
+        case <-ctx.Done():
+            return
+        case <-ticker.C:
+            messages := r.repo.GetPending(ctx)
+            for _, msg := range messages {
+                if err := r.kafka.Publish(ctx, msg.Topic, msg.Key, msg.Payload); err == nil {
+                    r.repo.MarkProcessed(ctx, msg.ID)
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+## Step 5.4 — Start & Test
 
 ```bash
 make docker-up

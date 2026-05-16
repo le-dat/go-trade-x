@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "github.com/verno/gotradex/proto";
+
+service OrderService {
+    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
+    rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+    rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message PlaceOrderRequest {
+    string user_id = 1;
+    string symbol = 2;
+    string side = 3;  // BUY or SELL
+    string type = 4;  // MARKET or LIMIT
+    string price = 5; // For LIMIT orders
+    string quantity = 6;
+    string idempotency_key = 7;
+}
+
+message PlaceOrderResponse {
+    string order_id = 1;
+    string status = 2;
+    string symbol = 3;
+    string side = 4;
+    string type = 5;
+    string price = 6;
+    string quantity = 7;
+    string filled_qty = 8;
+}
+
+message GetOrderRequest {
+    string order_id = 1;
+}
+
+message GetOrderResponse {
+    string order_id = 1;
+    string user_id = 2;
+    string symbol = 3;
+    string side = 4;
+    string type = 5;
+    string price = 6;
+    string quantity = 7;
+    string filled_qty = 8;
+    string status = 9;
+}
+
+message CancelOrderRequest {
+    string order_id = 1;
+}
+
+message CancelOrderResponse {
+    bool success = 1;
+    string order_id = 2;
+}

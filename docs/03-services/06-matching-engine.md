@@ -162,7 +162,42 @@ Key design: **per-symbol goroutine** — no cross-symbol lock contention.
 
 ---
 
-## Step 6.4 — Benchmark
+## Step 6.4 — State Recovery & Replay
+
+To achieve <1ms latency, the Matching Engine keeps orderbooks in RAM. On startup, it must rebuild this state.
+
+`internal/matching/engine.go`:
+
+```go
+func (e *Engine) Recover(ctx context.Context) error {
+    // 1. Create a new Kafka reader without a GroupID 
+    //    to read from the beginning of the topic
+    reader := kafka.NewReader(kafka.ReaderConfig{
+        Brokers: []string{e.broker},
+        Topic:   "orders",
+        StartOffset: kafka.FirstOffset,
+    })
+
+    // 2. Replay all messages into Match() but SILENCE the publisher
+    //    so we don't broadcast duplicate trades
+    for {
+        msg, err := reader.ReadMessage(ctx)
+        if err != nil {
+            break // End of topic or error
+        }
+        var order Order
+        json.Unmarshal(msg.Value, &order)
+        
+        // Rebuild orderbook without emitting trades
+        e.rebuildOrderbook(&order)
+    }
+    return nil
+}
+```
+
+---
+
+## Step 6.5 — Benchmark
 
 ```bash
 go test -bench=BenchmarkMatchingEngine -benchmem -count=5 ./internal/matching/...

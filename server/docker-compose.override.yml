@@ -1,0 +1,63 @@
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE_NAME: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_PORT=8080
+      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
+      - KAFKA_BROKERS=localhost:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  user-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE_NAME: user-service
+    ports:
+      - "50051:50051"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE_NAME: order-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
+      - KAFKA_BROKERS=localhost:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  matching-engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE_NAME: matching-engine
+    environment:
+      - KAFKA_BROKERS=localhost:9092
+
+  market-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE_NAME: market-service
+    ports:
+      - "8081:8081"
+    environment:
+      - KAFKA_BROKERS=localhost:9092

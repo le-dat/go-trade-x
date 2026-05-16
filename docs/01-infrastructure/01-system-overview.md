@@ -32,15 +32,18 @@ Establish the complete GoTradeX architecture before writing any code.
 ┌──────────────────────┐                            │
 │   Order Service      │         Kafka [trades]      │
 │   (:50052)          │◄────────────────────────────┘
-│   gRPC + Kafka      │
+│   gRPC + Outbox     │
 └──────────────────────┘
          │
-         │ Kafka [orders]
+         │ Outbox Relay
+         ▼
+     [orders] Kafka Topic
+         │
          ▼
 ┌──────────────────────┐
 │  Matching Engine     │
 │  Kafka Consumer      │
-│  In-Memory Orderbook │
+│  State Replay Logic  │
 └──────────────────────┘
 ```
 
@@ -119,14 +122,18 @@ Establish the complete GoTradeX architecture before writing any code.
 1. Client POST /api/v1/orders
 2. Gateway validates JWT → calls Order Service (gRPC)
 3. Order Service calls User Service → check balance
-4. Order Service persists order (status: PENDING)
-5. Order Service publishes to Kafka [orders]
-6. Matching Engine consumes → attempts match
+4. Order Service (Atomic Transaction):
+   - Persist order (status: PENDING)
+   - Persist Outbox message (target: orders topic)
+5. Outbox Relay (Async):
+   - Polls Outbox table → publishes to Kafka [orders]
+   - Marks Outbox as PROCESSED on success
+6. Matching Engine consumes → attempts match (In-memory)
 7a. Match found → publish to Kafka [trades]
 7b. No match → order stays in order book
 8. Market Service consumes [trades] → broadcasts via WebSocket
-9. Order/User Services consume [trades] → update balances & order status
-```
+9. Order/User Services consume [trades] → update balances & order status (FILLED/PARTIAL)
+10. Matching Engine Recovery: Replays [orders] topic on startup to rebuild memory state.
 
 ---
 

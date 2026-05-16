@@ -10,10 +10,30 @@ Document security measures and best practices for GoTradeX.
 
 ### JWT
 
-- **Algorithm**: HS256
+- **Algorithm**: RS256 (Recommended for Production)
 - **Expiry**: 24 hours
 - **Claims**: `userID`, `exp`, `iat`
-- **Secret**: Minimum 256-bit key, stored in secrets manager
+- **Keys**: Private key for User Service (Issuer), Public key for API Gateway (Validator).
+
+### Observability (OpenTelemetry)
+
+GoTradeX uses OpenTelemetry for distributed tracing to monitor order latency across services.
+
+- **Collector**: Jaeger / Honeycomb
+- **Propagation**: W3C Traceparent headers
+- **Instruments**:
+    - HTTP (Gin Middleware)
+    - gRPC (Unary Interceptors)
+    - Kafka (Header propagation in Producer/Consumer)
+
+```go
+func (p *kafkaProducer) Publish(ctx context.Context, topic string, key string, value []byte) error {
+    msg := kafka.Message{...}
+    // Inject trace context into Kafka headers
+    otel.GetTextMapPropagator().Inject(ctx, otelkafka.NewMessageCarrier(&msg))
+    return p.writer.WriteMessages(ctx, msg)
+}
+```
 
 ### Token Validation
 

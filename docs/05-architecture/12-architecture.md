@@ -58,11 +58,40 @@ Document key architectural decisions and rationale.
 
 ---
 
+## Decision 10: OpenTelemetry (OTel) for Observability
+
+**Decision**: Integrate OTel for distributed tracing across services.
+
+**Rationale**: Essential for debugging distributed flows (Gateway -> Order -> Kafka -> ME -> Market).
+
+---
+
 ## Decision 7: SELECT FOR UPDATE for Balance
 
 **Decision**: `SELECT ... FOR UPDATE` inside transaction for balance deduction
 
 **Rationale**: Prevents race conditions on concurrent deductions (row-level locking).
+
+---
+
+## Decision 8: Transactional Outbox Pattern
+
+**Decision**: Use an `outbox` table in PostgreSQL for Order -> Kafka messaging.
+
+**Rationale**:
+- Ensures **Atomic Consistency**: Order is only created if the intent to publish to Kafka is also recorded.
+- Prevents "lost orders" if the service crashes after DB commit but before Kafka publish.
+- Decouples DB transaction from Kafka availability.
+
+---
+
+## Decision 9: Deterministic State Replay for Matching Engine
+
+**Decision**: Replay `orders` topic from a known snapshot or from the beginning on startup.
+
+**Rationale**:
+- Matching Engine is in-memory for performance (<1ms latency).
+- Replay ensures the orderbook is correctly rebuilt after a restart or crash.
 
 ---
 
