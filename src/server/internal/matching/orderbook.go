@@ -90,6 +90,8 @@ func (ob *OrderBook) matchSell(remaining decimal.Decimal, incoming *Order) []Tra
 // Insert inserts a fully-remaining order into the appropriate heap.
 // Call after Match when remaining > 0.
 func (ob *OrderBook) Insert(order *Order) {
+	ob.mu.Lock()
+	defer ob.mu.Unlock()
 	if order.Side == "BUY" {
 		heap.Push(&ob.bids, order)
 	} else {

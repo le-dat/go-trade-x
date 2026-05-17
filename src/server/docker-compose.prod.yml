@@ -1,4 +1,26 @@
 services:
+  postgres:
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  kafka:
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
   api-gateway:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/gotradex-api-gateway:${IMAGE_TAG:-latest}
     build:

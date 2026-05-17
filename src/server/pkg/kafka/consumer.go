@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/segmentio/kafka-go"
+	"go.uber.org/zap"
 )
 
 // MessageHandler is a function that processes a kafka message.
@@ -13,10 +14,11 @@ type MessageHandler func(ctx context.Context, msg kafka.Message) error
 // Consumer wraps a kafka reader for consuming messages.
 type Consumer struct {
 	reader *kafka.Reader
+	log    *zap.Logger
 }
 
 // NewConsumer creates a Consumer that reads from the given topic.
-func NewConsumer(brokers []string, groupID, topic string) *Consumer {
+func NewConsumer(brokers []string, groupID, topic string, log *zap.Logger) *Consumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        brokers,
 		GroupID:        groupID,
@@ -27,7 +29,7 @@ func NewConsumer(brokers []string, groupID, topic string) *Consumer {
 		CommitInterval: time.Second,
 		StartOffset:    kafka.FirstOffset,
 	})
-	return &Consumer{reader: reader}
+	return &Consumer{reader: reader, log: log}
 }
 
 // Run starts consuming messages and calls handler for each.
@@ -44,10 +46,14 @@ func (c *Consumer) Run(ctx context.Context, handler MessageHandler) error {
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
+			// Non-context error - log and backoff to avoid spinning
+			c.log.With(zap.Error(err)).Warn("kafka read error, backing off")
+			time.Sleep(time.Second)
 			continue
 		}
 		if err := handler(ctx, msg); err != nil {
-			// Log but continue processing
+			// Log handler errors but continue processing
+			c.log.With(zap.Error(err)).Warn("handler error processing message")
 			continue
 		}
 	}

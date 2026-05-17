@@ -20,7 +20,7 @@ func main() {
 	log := logger.Get()
 
 	brokers := strings.Split(cfg.KafkaBrokers, ",")
-	engine := matching.NewEngine(brokers, log)
+	engine := matching.NewEngine(brokers, "matching-engine", log)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
