@@ -19,6 +19,7 @@ services:
       - APP_PORT=8080
       - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gotradex}?sslmode=disable
       - KAFKA_BROKERS=kafka:9092
+      - ORDER_SERVICE_ADDR=order-service:50052
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,6 +51,9 @@ services:
     environment:
       - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-gotradex}?sslmode=disable
       - KAFKA_BROKERS=kafka:9092
+      - USER_SERVICE_ADDR=user-service:50051
+    ports:
+      - "50052:50052"
     depends_on:
       postgres:
         condition: service_healthy

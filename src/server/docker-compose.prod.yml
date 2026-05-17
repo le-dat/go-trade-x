@@ -51,6 +51,7 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - KAFKA_BROKERS=${KAFKA_BROKERS:-kafka:9092}
+      - USER_SERVICE_ADDR=user-service:50051
     depends_on:
       postgres:
         condition: service_healthy

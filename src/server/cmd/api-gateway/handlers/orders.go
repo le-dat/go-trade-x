@@ -120,7 +120,16 @@ func (h *OrderHandler) GetOrder(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.orderClient.GetOrder(c.Request.Context(), orderID)
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User not authenticated",
+			"code":  "UNAUTHORIZED",
+		})
+		return
+	}
+
+	resp, err := h.orderClient.GetOrder(c.Request.Context(), orderID, userID.(string))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Order not found",

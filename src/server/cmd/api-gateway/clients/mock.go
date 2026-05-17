@@ -115,7 +115,7 @@ func (m *MockOrderClient) PlaceOrder(ctx context.Context, req *PlaceOrderRequest
 	}, nil
 }
 
-func (m *MockOrderClient) GetOrder(ctx context.Context, orderID string) (*GetOrderResponse, error) {
+func (m *MockOrderClient) GetOrder(ctx context.Context, orderID string, userID string) (*GetOrderResponse, error) {
 	// Mock implementation
 	if orderID == "" {
 		return nil, ErrMockOrderNotFound
@@ -123,7 +123,7 @@ func (m *MockOrderClient) GetOrder(ctx context.Context, orderID string) (*GetOrd
 
 	return &GetOrderResponse{
 		OrderID:   orderID,
-		UserID:    uuid.New().String(),
+		UserID:    userID,
 		Symbol:    "BTC/USD",
 		Side:      "BUY",
 		Type:      "LIMIT",
@@ -134,7 +134,7 @@ func (m *MockOrderClient) GetOrder(ctx context.Context, orderID string) (*GetOrd
 	}, nil
 }
 
-func (m *MockOrderClient) CancelOrder(ctx context.Context, orderID string) (*CancelOrderResponse, error) {
+func (m *MockOrderClient) CancelOrder(ctx context.Context, orderID string, userID string) (*CancelOrderResponse, error) {
 	// Mock implementation
 	if orderID == "" {
 		return nil, ErrMockOrderNotFound

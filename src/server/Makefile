@@ -77,6 +77,9 @@ infra-up:
 
 build: $(SERVICES) ## Build all 5 services in parallel to ./bin
 
+run-order: ## Run order-service locally
+	go run ./cmd/order-service
+
 $(SERVICES):
 	@echo "Building $@ (version: $(VERSION))..."
 	@mkdir -p $(BINARY_DIR)
