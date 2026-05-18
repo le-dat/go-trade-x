@@ -60,20 +60,20 @@ jobs:
           envs: GHCR_PAT
           script: |
             set -e
-            
+
             # Login to GitHub Container Registry using the ephemeral token
             echo $GHCR_PAT | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            cd /home/moltbot/server/go-trade-x/server
+
+            cd /home/moltbot/server/go-trade-x
             git fetch origin
             git pull origin main
-            
+
             # Export repository owner (lowercased) for docker-compose
             export GITHUB_REPOSITORY_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
-            
+
             # Deploy using Makefile
             make prod-pull
             make prod-restart
-            
+
             # Clean up old images
             docker image prune -af
