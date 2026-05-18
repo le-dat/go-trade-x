@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -28,9 +29,25 @@ func Load() *Config {
 		log.Fatal("JWT_SECRET environment variable is required")
 	}
 
+	dbURL := getEnv("DATABASE_URL", "")
+	if dbURL == "" {
+		dbUser := getEnv("DB_USER", "postgres")
+		dbPassword := getEnv("DB_PASSWORD", "")
+		if dbPassword == "" {
+			log.Fatal("Database password is not set. Please configure DB_PASSWORD or DATABASE_URL in your .env file or environment.")
+		}
+		dbHost := getEnv("DB_HOST", "localhost")
+		dbPort := getEnv("DB_PORT", "5432")
+		dbName := getEnv("DB_NAME", "gotradex")
+		dbSSLMode := getEnv("DB_SSLMODE", "disable")
+
+		dbURL = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+			dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+	}
+
 	return &Config{
 		AppPort:        getEnv("APP_PORT", "8080"),
-		DatabaseURL:    getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/gotradex?sslmode=disable"),
+		DatabaseURL:    dbURL,
 		KafkaBrokers:   getEnv("KAFKA_BROKERS", "localhost:9092"),
 		RedisURL:       getEnv("REDIS_URL", "localhost:6379"),
 		JWTSecret:      jwtSecret,

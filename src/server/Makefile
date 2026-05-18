@@ -1,7 +1,22 @@
 BINARY_DIR := bin
 PROTO_DIR := proto
 MIGRATIONS_DIR := migrations
-DATABASE_URL ?= postgres://postgres:postgres@localhost:5436/gotradex?sslmode=disable
+
+# Load environment variables from .env file if it exists
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
+DB_USER ?= postgres
+DB_NAME ?= gotradex
+
+# Construct DATABASE_URL if not provided but DB_PASSWORD is set
+ifeq ($(DATABASE_URL),)
+    ifneq ($(DB_PASSWORD),)
+        DATABASE_URL := postgres://$(DB_USER):$(DB_PASSWORD)@localhost:5436/$(DB_NAME)?sslmode=disable
+    endif
+endif
 
 # Services
 SERVICES := api-gateway user-service order-service matching-engine market-service
@@ -65,7 +80,7 @@ prod-logs: ## [PROD] Follow all logs
 infra-up:
 	@docker compose up -d postgres kafka
 	@echo "Waiting for PostgreSQL to be ready..."
-	@until docker compose exec -T postgres pg_isready -U postgres >/dev/null 2>&1; do \
+	@until docker compose exec -T postgres pg_isready -U $(DB_USER) >/dev/null 2>&1; do \
 		echo "Waiting for DB..."; \
 		sleep 2; \
 	done
@@ -96,10 +111,16 @@ swagger: ## Generate Swagger documentation
 	swag init -g cmd/api-gateway/main.go -o cmd/api-gateway/docs
 
 migrate: ## Apply all SQL up migrations
+ifeq ($(DATABASE_URL),)
+	$(error DATABASE_URL is not set. Please configure DB_PASSWORD or DATABASE_URL in your .env file)
+endif
 	@echo "Running migrations..."
 	@find $(MIGRATIONS_DIR) -name "*.up.sql" | sort | xargs -I {} sh -c 'echo "  Applying {}..."; psql "$(DATABASE_URL)" -f {}'
 
 migrate-down: ## Roll back all SQL migrations
+ifeq ($(DATABASE_URL),)
+	$(error DATABASE_URL is not set. Please configure DB_PASSWORD or DATABASE_URL in your .env file)
+endif
 	@echo "Rolling back migrations..."
 	@find $(MIGRATIONS_DIR) -name "*.down.sql" | sort -r | xargs -I {} sh -c 'echo "  Rolling back {}..."; psql "$(DATABASE_URL)" -f {}'
 

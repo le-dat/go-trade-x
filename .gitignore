@@ -1,0 +1,3 @@
+# GoTradeX Root Gitignore
+src/server/.env
+src/server/bin/
